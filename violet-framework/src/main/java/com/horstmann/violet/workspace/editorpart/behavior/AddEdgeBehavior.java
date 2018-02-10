@@ -7,11 +7,11 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collection;//
+import java.util.HashMap;//
 import java.util.List;
 
-import javax.swing.JOptionPane;
+import javax.swing.JOptionPane;//
 import javax.swing.SwingUtilities;
 
 import com.horstmann.violet.framework.dialog.DialogFactory;
@@ -22,10 +22,11 @@ import com.horstmann.violet.framework.injection.resources.annotation.ResourceBun
 import com.horstmann.violet.product.diagram.abstracts.IGraph;
 import com.horstmann.violet.product.diagram.abstracts.IGridSticker;
 import com.horstmann.violet.product.diagram.abstracts.Id;
+import com.horstmann.violet.product.diagram.abstracts.edge.AbstractEdge;//
 import com.horstmann.violet.product.diagram.abstracts.edge.IEdge;
 import com.horstmann.violet.product.diagram.abstracts.node.INode;
 import com.horstmann.violet.product.diagram.common.node.PointNode;
-import com.horstmann.violet.workspace.IWorkspace;
+import com.horstmann.violet.workspace.IWorkspace;//
 import com.horstmann.violet.workspace.editorpart.IEditorPart;
 import com.horstmann.violet.workspace.editorpart.IEditorPartBehaviorManager;
 import com.horstmann.violet.workspace.editorpart.IEditorPartSelectionHandler;
@@ -79,7 +80,8 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
         }
     }
 
-    public boolean isConstrainted(Point2D startPoint,IEdge newEdge)
+    //feature1
+    /*public boolean isConstrainted(Point2D startPoint,IEdge newEdge)
     {
     	if((!newEdge.getToolTip().equals("Is composed of")&&!newEdge.getToolTip().equals("Is an aggregate of"))||workspace.getConstraint1())
     	{
@@ -125,7 +127,7 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
 		{
 			return false;
 		}
-    }
+    }*/
      
     @Override
     public void onMouseDragged(MouseEvent event)
@@ -238,12 +240,12 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
         this.newEdge = (IEdge) prototype.clone();
         this.newEdge.setId(new Id());
         
-        if(isConstrainted(this.firstMousePoint,this.newEdge))
+        /*if(isConstrainted(this.firstMousePoint,this.newEdge))
         {
         	JOptionPane.showConfirmDialog(null, "You need to change the constraint first.","Warning", JOptionPane.ERROR_MESSAGE);
             cancel();
             return;
-        }   
+        } */  
     }
 
     private void transitionAction(MouseEvent event)
@@ -278,6 +280,38 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
     }
 
     /**
+     * @param startNode
+     * @param endNode
+     * @param newEdge
+     */
+    public boolean applyBidirectionalConstraint(INode startNode, INode endNode,IEdge newEdge){
+    	boolean constraintApplied = false;
+    	if (newEdge instanceof AbstractEdge) {
+            AbstractEdge abstractEdge = (AbstractEdge) newEdge;
+            if (abstractEdge.getType().equals("Aggregation") || abstractEdge.getType().equals("Composition")) {
+            	//if(startNode == endNode) && startNode.getGraph().getAllEdges().size() >= 1)
+                if (startNode.getGraph() != null && startNode.getGraph().getAllEdges() != null && startNode.getGraph().getAllEdges().size() >= 1) {
+                    for (IEdge edg : startNode.getGraph().getAllEdges()) {
+                        if (abstractEdge.getType().equals("Aggregation") || abstractEdge.getType().equals("Composition"))
+                            if (startNode.getId().equals(edg.getEndNode().getId()) &&
+                                    endNode.getId().equals(edg.getStartNode().getId())) {
+								if (startNode.getId().equals(endNode.getId())) {
+									JOptionPane.showMessageDialog(null," Recursive relationship is not allowed for aggregation and composition ", "",JOptionPane.ERROR_MESSAGE);
+								}
+                            	else
+                            	{
+                            		JOptionPane.showMessageDialog(null, " Bidirectional relationship is not allowed for aggregation and composition ", "", JOptionPane.ERROR_MESSAGE);
+                            	}
+                                return constraintApplied = true;
+                            }
+
+                    }
+                }
+            }
+        }
+		return constraintApplied;
+    }
+    /**
      * Adds an edge at a specific location
      * 
      * @param newEdge
@@ -285,48 +319,40 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
      * @param endPoint
      * @return true id the edge has been added
      */
-    public boolean addEdgeAtPoints(IEdge newEdge, Point2D startPoint, Point2D endPoint)
-    {
-    	//System.out.println("addEdgeAtPoints");
+    public boolean addEdgeAtPoints(IEdge newEdge, Point2D startPoint, Point2D endPoint) {
         boolean isAdded = false;
-        if (startPoint.distance(endPoint) > CONNECT_THRESHOLD)
-        {
-        	//大于连接阈值
-        	//System.out.println("大于连接阈值");
+
+        if (startPoint.distance(endPoint) > CONNECT_THRESHOLD) {
             this.behaviorManager.fireBeforeAddingEdgeAtPoints(newEdge, startPoint, endPoint);
-            try
-            {
-                INode startNode = graph.findNode(startPoint);
-                INode endNode = graph.findNode(endPoint);
+            INode startNode = graph.findNode(startPoint);
+            INode endNode = graph.findNode(endPoint);
+            //feature2
+            //if(feature1 is checked, do not call the applyBidirectional or applyRecursive constraint method)
+            
+            if(applyBidirectionalConstraint(startNode, endNode, newEdge))
+                return isAdded;
+            
+            try {
                 Point2D relativeStartPoint = null;
                 Point2D relativeEndPoint = null;
                 Point2D[] transitionPointsAsArray = this.transitionPoints.toArray(new Point2D[this.transitionPoints.size()]);
-                if (startNode != null)
-                {      
-                	//System.out.println("开始节点不为空");
+                if (startNode != null) {
                     Point2D startNodeLocationOnGraph = startNode.getLocationOnGraph();
                     double relativeStartX = startPoint.getX() - startNodeLocationOnGraph.getX();
                     double relativeStartY = startPoint.getY() - startNodeLocationOnGraph.getY();
                     relativeStartPoint = new Point2D.Double(relativeStartX, relativeStartY);
                 }
-                if (endNode != null)
-                {
-                	//System.out.println("结束节点不为空");
+                if (endNode != null) {
                     Point2D endNodeLocationOnGraph = endNode.getLocationOnGraph();
                     double relativeEndX = endPoint.getX() - endNodeLocationOnGraph.getX();
                     double relativeEndY = endPoint.getY() - endNodeLocationOnGraph.getY();
                     relativeEndPoint = new Point2D.Double(relativeEndX, relativeEndY);
                 }
-                if (graph.connect(newEdge, startNode, relativeStartPoint, endNode, relativeEndPoint, transitionPointsAsArray))
-                {
-                	//图连接
-                	//System.out.println("图连接");
+                if (graph.connect(newEdge, startNode, relativeStartPoint, endNode, relativeEndPoint, transitionPointsAsArray)) {
                     newEdge.incrementRevision();
                     isAdded = true;
                 }
-            }
-            finally
-            {
+            } finally {
                 this.behaviorManager.fireAfterAddingEdgeAtPoints(newEdge, startPoint, endPoint);
             }
         }

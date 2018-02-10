@@ -74,7 +74,6 @@ public class MainFrame extends JFrame
      */
     public MainFrame()
     {
-    	//System.out.println("1");
         BeanInjector.getInjector().inject(this);
         ResourceBundleInjector.getInjector().inject(this);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -90,7 +89,6 @@ public class MainFrame extends JFrame
      */
     private void setInitialSize()
     {
-    	//System.out.println("2");
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenWidth = (int) screenSize.getWidth();
         int screenHeight = (int) screenSize.getHeight();
@@ -104,7 +102,6 @@ public class MainFrame extends JFrame
      */
     private void decorateFrame()
     {
-    	//System.out.println("3");
         setTitle(this.applicationName);
         setIconImage(this.applicationIcon);
     }
@@ -114,7 +111,6 @@ public class MainFrame extends JFrame
      */
     private void createMenuBar()
     {
-    	//System.out.println("4");
         JMenuBar menuBar = new JMenuBar();
         menuBar.setFont(this.themeManager.getTheme().getMenubarFont());
         MenuFactory menuFactory = getMenuFactory();
@@ -123,6 +119,7 @@ public class MainFrame extends JFrame
         menuBar.add(menuFactory.getViewMenu(this));
         menuBar.add(menuFactory.getDocumentMenu(this));
         menuBar.add(menuFactory.getHelpMenu(this));
+        menuBar.add(menuFactory.getGroupTMenu(this));
         setJMenuBar(menuBar);
     }
     
@@ -135,7 +132,6 @@ public class MainFrame extends JFrame
      */
     private void listenToWorkspaceEvents(final IWorkspace workspace)
     {
-    	//System.out.println("5");
         workspace.addListener(new IWorkspaceListener()
         {
             public void titleChanged(String newTitle)
@@ -171,7 +167,6 @@ public class MainFrame extends JFrame
      */
     public void removeWorkspace(IWorkspace workspaceToRemove)
     {
-    	//System.out.println("6");
         if (!this.workspaceList.contains(workspaceToRemove))
         {
             return;
@@ -203,10 +198,7 @@ public class MainFrame extends JFrame
         setActiveWorkspace(workspaceToDisplay);
     }
     
-    public void addWorkspace(IWorkspace newWorkspace) 
-    {
-    	//System.out.println("7");
-    	//创建类图从这里开始
+    public void addWorkspace(IWorkspace newWorkspace) {
         this.workspaceList.add(newWorkspace);
         setActiveWorkspace(newWorkspace);
     }
@@ -219,11 +211,9 @@ public class MainFrame extends JFrame
      */
     public void setActiveWorkspace(IFile aGraphFile)
     {
-    	//System.out.println("8");
         if (aGraphFile == null) return;
         for (IWorkspace aWorkspace : this.workspaceList)
         {
-        	//System.out.println("8.1");
             IFile toCompare = aWorkspace.getGraphFile();
             boolean isSameFilename = aGraphFile.getFilename().equals(toCompare.getFilename());
             if (isSameFilename)
@@ -234,11 +224,8 @@ public class MainFrame extends JFrame
         }
     }
     
-    public void setActiveWorkspace(IWorkspace activeWorkspace) 
-    {
-    	//System.out.println("9");
-        if (!this.workspaceList.contains(activeWorkspace)) 
-        {
+    public void setActiveWorkspace(IWorkspace activeWorkspace) {
+        if (!this.workspaceList.contains(activeWorkspace)) {
             return;
         }
         WorkspacePanel activeWorkspaceComponent = activeWorkspace.getAWTComponent();
@@ -258,13 +245,11 @@ public class MainFrame extends JFrame
      */
     public boolean isThereAnyDiagramDisplayed()
     {
-    	//System.out.println("10");
         return !this.workspaceList.isEmpty();
     }
 
     public List<IWorkspace> getWorkspaceList()
     {
-    	//System.out.println("11");
         return workspaceList;
     }
 
@@ -273,7 +258,6 @@ public class MainFrame extends JFrame
      */
     public IWorkspace getActiveWorkspace()
     {
-    	//System.out.println("12");
         Component activeWorkspace = ((BorderLayout) getMainPanel().getLayout()).getLayoutComponent(BorderLayout.CENTER);
         if (activeWorkspace == null) {
             return null;
@@ -287,11 +271,8 @@ public class MainFrame extends JFrame
     }
 
 
-    private JPanel getMainPanel() 
-    {
-    	//System.out.println("13");
-        if (this.mainPanel == null) 
-        {
+    private JPanel getMainPanel() {
+        if (this.mainPanel == null) {
             this.mainPanel = new JPanel(new BorderLayout());
             this.mainPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
             this.mainPanel.add(new JPanel(), BorderLayout.CENTER);
@@ -310,7 +291,6 @@ public class MainFrame extends JFrame
      */
     public MenuFactory getMenuFactory()
     {
-    	//System.out.println("14");
         if (this.menuFactory == null)
         {
             menuFactory = new MenuFactory();

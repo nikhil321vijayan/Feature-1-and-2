@@ -25,6 +25,8 @@ public class AggregationEdge extends LabeledLineEdge
     protected AggregationEdge(AggregationEdge cloned)
     {
         super(cloned);
+        //feature 2
+        setType("Aggregation");
     }
 
     @Override

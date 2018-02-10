@@ -25,6 +25,8 @@ public class CompositionEdge extends LabeledLineEdge
     protected CompositionEdge(CompositionEdge cloned)
     {
         super(cloned);
+        //feature2
+        setType("Composition");
     }
 
     @Override

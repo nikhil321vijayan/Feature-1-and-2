@@ -98,11 +98,21 @@ public class MenuFactory
         }
         return this.documentMenu;
     }
+    
+    public GroupTMenu getGroupTMenu(MainFrame editorFrame)
+    {
+        if (this.groupTMenu == null)
+        {
+            this.groupTMenu = new GroupTMenu(editorFrame);
+        }
+        return this.groupTMenu;
+    }
 
     private EditMenu editMenu;
     private FileMenu fileMenu;
     private HelpMenu helpMenu;
     private ViewMenu viewMenu;
     private DocumentMenu documentMenu;
+    private GroupTMenu groupTMenu;
 
 }

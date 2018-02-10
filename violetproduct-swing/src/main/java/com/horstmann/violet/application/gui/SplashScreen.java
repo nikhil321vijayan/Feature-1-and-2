@@ -42,6 +42,7 @@ import com.horstmann.violet.framework.injection.resources.annotation.ResourceBun
  * @author Alexandre de Pellegrin
  * 
  */
+ //wtf
 @ResourceBundleBean(resourceReference = AboutDialog.class)
 public class SplashScreen extends JWindow
 {

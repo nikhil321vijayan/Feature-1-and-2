@@ -45,11 +45,23 @@ public abstract class AbstractEdge implements IEdge
         this.endNode = null;
         this.endLocation = null;
         this.transitionPoints = new Point2D[] {};
+        this.type="";
     }
+    
+    //feature 2
+    public String type;
 
     protected AbstractEdge(AbstractEdge cloned) throws CloneNotSupportedException
     {
         refreshContactPoints();
+    }
+    
+    public void setType(String type){
+    	this.type=type;
+    }
+    
+    public String getType(){
+    	return type;
     }
 
     @Override

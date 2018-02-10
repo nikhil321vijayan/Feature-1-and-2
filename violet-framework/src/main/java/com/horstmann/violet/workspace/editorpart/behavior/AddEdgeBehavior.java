@@ -280,6 +280,10 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
     }
 
     /**
+     * Apply bidirectional constraint to the edges.
+     * Displays a pop up message
+     * Feature 2
+     * 
      * @param startNode
      * @param endNode
      * @param newEdge
@@ -295,14 +299,38 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
                         if (abstractEdge.getType().equals("Aggregation") || abstractEdge.getType().equals("Composition"))
                             if (startNode.getId().equals(edg.getEndNode().getId()) &&
                                     endNode.getId().equals(edg.getStartNode().getId())) {
-								if (startNode.getId().equals(endNode.getId())) {
-									JOptionPane.showMessageDialog(null," Recursive relationship is not allowed for aggregation and composition ", "",JOptionPane.ERROR_MESSAGE);
-								}
-                            	else
-                            	{
                             		JOptionPane.showMessageDialog(null, " Bidirectional relationship is not allowed for aggregation and composition ", "", JOptionPane.ERROR_MESSAGE);
-                            	}
-                                return constraintApplied = true;
+                            		return constraintApplied = true;
+                            }
+                    }
+                }
+            }
+        }
+		return constraintApplied;
+    }
+    
+    /**
+     * Apply recursive constraint to the edges.
+     * Displays a pop up message
+     * feature 1
+     * 
+     * @param startNode
+     * @param endNode
+     * @param newEdge
+     */
+    public boolean applyRecursiveConstraint(INode startNode, INode endNode,IEdge newEdge){
+    	boolean constraintApplied = false;
+    	if (newEdge instanceof AbstractEdge) {
+            AbstractEdge abstractEdge = (AbstractEdge) newEdge;
+            if (abstractEdge.getType().equals("Aggregation") || abstractEdge.getType().equals("Composition")) {
+            	//if(startNode == endNode) && startNode.getGraph().getAllEdges().size() >= 1)
+                if (startNode.getGraph() != null && startNode.getGraph().getAllEdges() != null && startNode.getGraph().getAllEdges().size() >= 1) {
+                    for (IEdge edg : startNode.getGraph().getAllEdges()) {
+                        if (abstractEdge.getType().equals("Aggregation") || abstractEdge.getType().equals("Composition"))
+                            if (startNode.getId().equals(edg.getEndNode().getId()) &&
+                                    endNode.getId().equals(edg.getStartNode().getId())) {
+									JOptionPane.showMessageDialog(null," Recursive relationship is not allowed for aggregation and composition ", "",JOptionPane.ERROR_MESSAGE);
+									return constraintApplied = true;
                             }
 
                     }
@@ -311,6 +339,7 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
         }
 		return constraintApplied;
     }
+    
     /**
      * Adds an edge at a specific location
      * 
@@ -326,11 +355,16 @@ public class AddEdgeBehavior extends AbstractEditorPartBehavior implements IGrap
             this.behaviorManager.fireBeforeAddingEdgeAtPoints(newEdge, startPoint, endPoint);
             INode startNode = graph.findNode(startPoint);
             INode endNode = graph.findNode(endPoint);
-            //feature2
             //if(feature1 is checked, do not call the applyBidirectional or applyRecursive constraint method)
             
+            if (startNode.getId().equals(endNode.getId())) {
+            	if(applyRecursiveConstraint(startNode, endNode, newEdge))
+                    return isAdded;
+            }
+            else{
             if(applyBidirectionalConstraint(startNode, endNode, newEdge))
                 return isAdded;
+            }
             
             try {
                 Point2D relativeStartPoint = null;
